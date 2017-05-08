@@ -22,6 +22,19 @@ app.get('/', function(req, res) {
     res.send("Hello World");
 })
 
+// route for shortening uri
+app.get('/new/*', function(req, res) {
+   console.log(req.url);
+   const original = req.url.replace('/new/', '');
+   
+   //   if url is not valid
+   if(!validUrl.isWebUri(original)) {
+    // return error as response
+     res.json({ error: "Invalid URL"});
+   }
+   res.send(original);
+});
+
 app.listen(8080, function() {
     console.log("Listening on port 8080");
 });
