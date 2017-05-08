@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
+const Url = require('./models/url.js');
 
 // package for url validation
 const validUrl = require('valid-url');
@@ -24,15 +25,24 @@ app.get('/', function(req, res) {
 
 // route for shortening uri
 app.get('/new/*', function(req, res) {
-   console.log(req.url);
    const original = req.url.replace('/new/', '');
    
-   //   if url is not valid
+   // if url is not valid
    if(!validUrl.isWebUri(original)) {
     // return error as response
      res.json({ error: "Invalid URL"});
    }
-   res.send(original);
+   // create url with mongoose
+   Url.create({
+     initUrl: original  
+   }, function(err, created) {
+       if(err) { console.error(err); }
+       res.json({
+           initUrl: created.initUrl,
+           shortenedUrl: baseUrl + created.shortenedUrl
+       });
+   });
+//   res.send(original);
 });
 
 app.listen(8080, function() {
