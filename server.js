@@ -10,6 +10,7 @@ const validUrl = require('valid-url');
 const mongoUri = process.env.MONGOLAB_URI || 'mongodb://localhost/app-dev';
 const mongoOptions = {db: {safe: true}};
 const baseUrl = process.env.BASE_URL || ('http://localhost:8080/');
+mongoose.Promise = global.Promise;
 
 // connect to database
 mongoose.connect(mongoUri, mongoOptions);
@@ -42,7 +43,21 @@ app.get('/new/*', function(req, res) {
            shortenedUrl: baseUrl + created.shortenedUrl
        });
    });
-//   res.send(original);
+});
+
+// route for redirecting url
+app.get('/*', function(req, res) {
+    // search database for input shortened url
+    Url.findOne({shortenedUrl: req.url.slice(1)}).exec().then(function(found) {
+        // if found
+        if (found) {
+            // redirect user
+            res.redirect(found.initUrl);
+        } else {
+            // throw error
+            res.send({error: "No short url found for given input"});
+        }
+    });
 });
 
 app.listen(8080, function() {
